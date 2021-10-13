@@ -20,11 +20,13 @@ typedef HANDLE multi_handle;
 #define multi_handle_close(handle) CloseHandle(handle)
 #endif
 
-bool prevent_multi_start(multi_handle *handle, const std::string &lock_name) {
+bool prevent_multi_start(multi_handle *handle, std::string &lock_name) {
   handle = NULL;
 #if defined(__linux__)
-  std::string loack_path = "/tmp/" + lock_name + ".lock";
-  int lock_file = open(loack_path.c_str(), O_CREAT | O_RDWR, 0666);
+  if (ret.find("/") == ret.npos) {
+    lock_name = "/tmp/" + lock_name + ".lock";
+  }
+  int lock_file = open(lock_name.c_str(), O_CREAT | O_RDWR, 0666);
   int rc = flock(lock_file, LOCK_EX | LOCK_NB);
   if (rc) {
     if (EWOULDBLOCK == errno) {
@@ -56,7 +58,8 @@ bool prevent_multi_start(multi_handle *handle, const std::string &lock_name) {
 
 int main() {
   multi_handle handle;
-  if (prevent_multi_start(&handle, "single_proc")) {
+  std::string lock_name = "single_proc";
+  if (prevent_multi_start(&handle, lock_name)) {
     printf("program is running\n");
   } else {
     printf("start , wait input : ");
