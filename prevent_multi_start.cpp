@@ -23,7 +23,7 @@ typedef HANDLE multi_handle;
 bool prevent_multi_start(multi_handle *handle, std::string &lock_name) {
   handle = NULL;
 #if defined(__linux__)
-  if (ret.find("/") == ret.npos) {
+  if (lock_name.find("/") == lock_name.npos) {
     lock_name = "/tmp/" + lock_name + ".lock";
   }
   int lock_file = open(lock_name.c_str(), O_CREAT | O_RDWR, 0666);
